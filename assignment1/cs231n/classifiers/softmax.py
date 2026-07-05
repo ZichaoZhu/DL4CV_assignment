@@ -30,19 +30,24 @@ def softmax_loss_naive(W, X, y, reg):
     num_classes = W.shape[1]
     num_train = X.shape[0]
     for i in range(num_train):
-        scores = X[i].dot(W)
+        scores = X[i].dot(W)    # scores (1, C)
 
         # compute the probabilities in numerically stable way
+        # 防止数值不稳定（超过浮点数限制范围），减去最大值
         scores -= np.max(scores)
         p = np.exp(scores)
         p /= p.sum()  # normalize
         logp = np.log(p)
 
         loss -= logp[y[i]]  # negative log probability is the loss
+        dscores = p.copy()
+        dscores[y[i]] -= 1
+        dW += np.outer(X[i], dscores)  # accumulate the gradient
 
 
     # normalized hinge loss plus regularization
     loss = loss / num_train + reg * np.sum(W * W)
+    dW = dW / num_train + 2 * reg * W
 
     #############################################################################
     # TODO:                                                                     #
@@ -52,7 +57,7 @@ def softmax_loss_naive(W, X, y, reg):
     # loss is being computed. As a result you may need to modify some of the    #
     # code above to compute the gradient.                                       #
     #############################################################################
-
+    
 
     return loss, dW
 
@@ -73,6 +78,13 @@ def softmax_loss_vectorized(W, X, y, reg):
     # Implement a vectorized version of the softmax loss, storing the           #
     # result in loss.                                                           #
     #############################################################################
+    scores = X.dot(W)   # scores (N, C)
+    scores -= np.max(scores, axis=1, keepdims=True)  # for numerical stability
+    p = np.exp(scores)
+    p /= np.sum(p, axis=1, keepdims=True)  # normalize to get probabilities
+    N = X.shape[0]
+    loss = -np.sum(np.log(p[np.arange(N), y])) / N
+    loss += reg * np.sum(W * W)  # add regularization
 
 
     #############################################################################
@@ -84,6 +96,10 @@ def softmax_loss_vectorized(W, X, y, reg):
     # to reuse some of the intermediate values that you used to compute the     #
     # loss.                                                                     #
     #############################################################################
-
+    dscores = p.copy()
+    dscores[np.arange(N), y] -= 1
+    dscores /= N
+    dW = X.T.dot(dscores)
+    dW += 2 * reg * W  # add regularization
 
     return loss, dW

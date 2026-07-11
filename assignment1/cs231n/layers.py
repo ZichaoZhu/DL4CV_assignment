@@ -31,6 +31,8 @@ def affine_forward(x, w, b):
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    x_flat = x.reshape(x.shape[0], -1)
+    out = x_flat.dot(w) + b
     cache = (x, w, b)
     return out, cache
 
@@ -60,6 +62,12 @@ def affine_backward(dout, cache):
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    N = x.shape[0]
+    x_flat = x.reshape(N, -1)
+    dx_flat = dout.dot(w.T)
+    dx = dx_flat.reshape(x.shape)
+    dw = x_flat.T.dot(dout)
+    db = np.sum(dout, axis=0)
     return dx, dw, db
 
 
@@ -82,6 +90,7 @@ def relu_forward(x):
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    out = np.maximum(0, x)
     cache = x
     return out, cache
 
@@ -105,6 +114,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    dx = dout * (x > 0)
     return dx
 
 
@@ -718,4 +728,16 @@ def softmax_loss(x, y):
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    shifted_x = x - np.max(x, axis=1, keepdims=True)
+
+    p = np.exp(shifted_x)
+    p /= np.sum(p, axis=1, keepdims=True)
+
+    N = x.shape[0]
+    loss = -np.sum(np.log(p[np.arange(N), y])) / N
+
+    dx = p.copy()
+    dx[np.arange(N), y] -= 1
+    dx /= N
+    
     return loss, dx

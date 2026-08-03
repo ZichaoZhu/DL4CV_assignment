@@ -116,7 +116,7 @@ def hog_feature(im):
         temp_ori = np.where(grad_ori < 180 / orientations * (i + 1), grad_ori, 0)
         temp_ori = np.where(grad_ori >= 180 / orientations * i, temp_ori, 0)
         # select magnitudes for those orientations
-        cond2 = temp_ori > 0
+        cond2 = temp_ori > 0    # boolean array for orientations in this rangej
         temp_mag = np.where(cond2, grad_mag, 0)
         orientation_histogram[:, :, i] = uniform_filter(temp_mag, size=(cx, cy))[
             round(cx / 2) :: cx, round(cy / 2) :: cy

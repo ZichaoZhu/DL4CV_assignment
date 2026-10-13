@@ -1,0 +1,3 @@
+cs231n/datasets/coco_captioning/
+__pycache__/
+*.pyc

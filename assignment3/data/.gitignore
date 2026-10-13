@@ -1,3 +1,4 @@
 cifar-10-batches-py/*
 /coco_captioning/*
 imagenet_val_25.npz
+cifar-10-python.tar.gz
